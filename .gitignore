@@ -2,3 +2,5 @@ node_modules
 bld
 bld_test
 exampleFiles
+.npmrc
+npm-debug.log
