@@ -1,6 +1,6 @@
 {
   "name": "infco",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Another take on infrastructure as code.",
   "main": "bld/infCo.js",
   "bin": {
