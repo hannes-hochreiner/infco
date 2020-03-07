@@ -1,6 +1,6 @@
 {
   "name": "infco",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Another take on infrastructure as code.",
   "main": "bld/infCo.js",
   "bin": {
@@ -15,8 +15,8 @@
   "author": "Hannes Hochreiner <hannes@hochreiner.net>",
   "license": "MIT",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/hannes-hochreiner/infco"
+    "type": "git",
+    "url": "https://github.com/hannes-hochreiner/infco"
   },
   "dependencies": {
     "axios": "^0.19.2",
