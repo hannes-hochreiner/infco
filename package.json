@@ -2,11 +2,15 @@
   "name": "infco",
   "version": "1.0.0",
   "description": "Another take on infrastructure as code.",
-  "main": "bld/index.js",
+  "main": "bld/infCo.js",
+  "bin": {
+    "infco": "bld/binInfCo.js"
+  },
   "scripts": {
     "test": "npm run build_test; npm run build_test; node bld_test/run_jasmine.js",
     "build": "babel src -d bld",
-    "build_test": "babel src_test -d bld_test"
+    "build_test": "babel src_test -d bld_test",
+    "prepublish": "npm run build"
   },
   "author": "Hannes Hochreiner <hannes@hochreiner.net>",
   "license": "MIT",
