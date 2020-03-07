@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "npm run build_test; npm run build_test; node bld_test/run_jasmine.js",
-    "build": "babel src -d bld",
-    "build_test": "babel src_test -d bld_test",
+    "build": "rm -r ./bld; babel src -d bld",
+    "build_test": "rm -r ./bld_test; babel src_test -d bld_test",
     "prepublish": "npm run build"
   },
   "author": "Hannes Hochreiner <hannes@hochreiner.net>",

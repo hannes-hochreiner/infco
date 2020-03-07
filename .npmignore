@@ -3,3 +3,5 @@ bld_test
 exampleFiles
 src
 src_test
+babel.config.json
+jasmine.json
