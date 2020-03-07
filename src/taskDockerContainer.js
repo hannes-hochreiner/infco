@@ -64,16 +64,22 @@ export class TaskDockerContainer {
     };
     reqConfig.data = {
       Image: config.image,
-      Env: Object.getOwnPropertyNames(config.env).map(elem => `${elem}=${config.env[elem]}`),
       HostConfig: {
-        Binds: config.volumes,
         RestartPolicy: {
           Name: "on-failure",
           MaximumRetryCount: 10
         }
       }
     };
-   
+
+    if (typeof config.env !== 'undefined') {
+      reqConfig.data.Env = Object.getOwnPropertyNames(config.env).map(elem => `${elem}=${config.env[elem]}`);
+    }
+
+    if (typeof config.volumes !== 'undefined') {
+      reqConfig.data.HostConfig.Binds = config.volumes;
+    }
+
     await ctxRequ.request(reqConfig);
   }
 
