@@ -41,6 +41,9 @@ export class TaskDockerContainer {
       if (container.State.Status !== 'running') {
         await this.startContainer(ctxRequ, config);
         returnString = 'updated';
+      } else if (config.restart) {
+        await this.restartContainer(ctxRequ, config);
+        returnString = 'restarted';
       }
 
       return returnString;
@@ -79,6 +82,15 @@ export class TaskDockerContainer {
 
     reqConfig.method = 'post';
     reqConfig.url = `/containers/${config.containerName}/start`;
+
+    await ctxRequ.request(reqConfig);
+  }
+
+  static async restartContainer(ctxRequ, config) {
+    let reqConfig = {};
+
+    reqConfig.method = 'post';
+    reqConfig.url = `/containers/${config.containerName}/restart`;
 
     await ctxRequ.request(reqConfig);
   }
