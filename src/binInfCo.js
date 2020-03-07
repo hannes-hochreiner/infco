@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Client } from "ssh2";
 import { ContextSsh } from './contextSsh';
 import { default as Axios } from 'axios';
