@@ -1,21 +1,52 @@
 export class TaskCouchDbDoc {
   static async run(context, config) {
     let ctxRequ;
-    let [ctxConfig, reqConfig] = TaskCouchDbDoc.processConfig(config);
+    let ctxConfig = {
+      protocol: config.protocol || 'http',
+      host: config.host,
+      port: config.port,
+      socketPath: config.socketPath
+    }
+
+    if (typeof ctxConfig.host === 'undefined' && typeof ctxConfig.port === 'undefined' && typeof ctxConfig.socketPath === 'undefined') {
+      ctxConfig.host = '127.0.0.1';
+      ctxConfig.port = 5984;
+    }
 
     try {
       ctxRequ = context.createRequest();
       await ctxRequ.open(ctxConfig);
 
-      let {_id, _rev, ...data} = (await ctxRequ.request(reqConfig)).data;
-      let newDoc = JSON.parse(config.content);
+      let reqConfig = {
+        method: 'get',
+        url: config.url,
+        auth: config.auth
+      };
 
-      if (JSON.stringify(data).localeCompare(JSON.stringify(newDoc)) == 0) {
+      let id, rev, data;
+
+      try {
+        let oldDoc = (await ctxRequ.request(reqConfig)).data;
+
+        id = oldDoc._id;
+        rev = oldDoc._rev;
+        data = JSON.parse(JSON.stringify(oldDoc));
+        delete data._id;
+        delete data._rev;
+      } catch (error) {
+        if (typeof error.response === 'undefined' || error.response.status != 404) {
+          throw error;
+        }
+      }
+
+      let newDoc = JSON.parse(config.content);
+  
+      if (typeof data != 'undefined' && JSON.stringify(data).localeCompare(JSON.stringify(newDoc)) == 0) {
         return 'ok';
       }
-      
-      newDoc._id = _id;
-      newDoc._rev = _rev;
+
+      newDoc._id = id;
+      newDoc._rev = rev;
 
       reqConfig.method = 'put';
       reqConfig.data = newDoc;
@@ -27,21 +58,5 @@ export class TaskCouchDbDoc {
         await ctxRequ.close();
       }
     }
-  }
-
-  static processConfig(config) {
-    let ctxPropNames = ['protocol', 'host', 'port', 'socketPath'];
-    let ctxConfig = {};
-    let reqConfig = {};
-
-    Object.getOwnPropertyNames(config).forEach(propName => {
-      if (ctxPropNames.includes(propName)) {
-        ctxConfig[propName] = config[propName];
-      } else {
-        reqConfig[propName] = config[propName];
-      }
-    });
-
-    return [ctxConfig, reqConfig];
   }
 }
