@@ -10,8 +10,10 @@ export class InfCo {
     let varList = await this._transformValues(tasks.vars || {});
     this._valueTransformer.registerVars(varList);
     let taskList = await this._transformValues(tasks.tasks);
-  
-    for (let hostIdx in hostList.hosts) {
+    let taskTags = tasks.tags || [];
+    let filteredHostList = hostList.hosts.filter(host => (host.tags || []).some(tag => taskTags.includes(tag)));
+
+    for (let hostIdx in filteredHostList) {
       await this._processHost(hostList.hosts[hostIdx], taskList);
     }
   }
