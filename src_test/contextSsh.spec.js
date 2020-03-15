@@ -10,6 +10,11 @@ describe("ContextSsh", function() {
     expect(sshMock.eventHandler.ready).toBeDefined();
     expect(sshMock.eventHandler.error).toBeDefined();
     expect(sshMock.config).toEqual(config);
+
+    let exec = ssh.createExec();
+    let command = "test";
+    exec.exec(command);
+    expect(sshMock.command).toEqual(command);
   });
 });
 
@@ -26,5 +31,11 @@ class SshMock {
 
   connect(config) {
     this.config = config;
+
+    this.eventHandler["ready"]();
+  }
+
+  exec(command) {
+    this.command = command;
   }
 }
