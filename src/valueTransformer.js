@@ -45,7 +45,10 @@ export class ValueTransformer {
         throw new Error(`Property "${config.name}" is not registered with the value transformer.`);
       }
 
-      return Promise.resolve(this._vars[config.name]);
+      let prefix = config.prefix || '';
+      let suffix = config.suffix || '';
+
+      return Promise.resolve(`${prefix}${this._vars[config.name]}${suffix}`);
     }
 
     throw new Error(`Unknown value transform "${config.valueTransform}".`);
