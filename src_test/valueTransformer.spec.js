@@ -24,4 +24,16 @@ describe("ValueTransformer", function() {
 
     expect(await vt.transform({"valueTransform":"prefixSuffix", "text":"test1", "prefix": "_", "suffix": "*"})).toEqual("_test1*");
   });
+
+  it("can insert a date", async function() {
+    let vt = new ValueTransformer();
+
+    expect(await vt.transform({"valueTransform":"utcTimestamp", "format": "ISO", "part":"date"})).toEqual((new Date()).toISOString().substr(0,10));
+  });
+
+  it("can insert a timestamp", async function() {
+    let vt = new ValueTransformer();
+
+    expect(await vt.transform({"valueTransform":"utcTimestamp"})).toEqual((new Date()).toISOString());
+  });
 });

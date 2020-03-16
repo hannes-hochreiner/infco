@@ -80,6 +80,27 @@ export class ValueTransformer {
       let suffix = config.suffix || '';
 
       return Promise.resolve(`${prefix}${config.text}${suffix}`);
+    } else if (config.valueTransform == 'utcTimestamp') {
+      const formatOptions = ['ISO'];
+      const partOptions = ['full', 'date'];
+      let format = config.format || 'ISO';
+      let part = config.part || 'full';
+
+      if (!formatOptions.includes(format)) {
+        throw new Error(`Format "${format}" unknown.`);
+      }
+
+      if (!partOptions.includes(part)) {
+        throw new Error(`Part "${part}" unknown.`);
+      }
+
+      let res = (new Date()).toISOString();
+
+      if (part === 'date') {
+        res = res.substr(0,10);
+      }
+
+      return Promise.resolve(res);
     }
 
     throw new Error(`Unknown value transform "${config.valueTransform}".`);
