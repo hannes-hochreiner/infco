@@ -10,7 +10,7 @@ describe("ValueTransformer", function() {
     expect(await vt.transform({"valueTransform":"var", "name":"test1"})).toEqual("test2");
   });
 
-  it("can insert resolve nested transforms", async function() {
+  it("can resolve nested transforms", async function() {
     let vt = new ValueTransformer();
 
     vt.registerVars({
