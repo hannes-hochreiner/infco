@@ -11,7 +11,36 @@ export class ValueTransformer {
     });
   }
 
-  async transform(config) {
+  async transform(obj) {
+    if (obj instanceof Array) {
+      for (let idx in obj) {
+        obj[idx] = await this.transform(obj[idx]);
+      }
+      return obj;
+    } else if (obj instanceof Object) {
+      let res = {};
+    
+      for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          if (obj[key] instanceof Object) {
+            res[key] = await this.transform(obj[key]);
+          } else {
+            res[key] = obj[key];
+          }
+        }
+      }
+    
+      if (obj.valueTransform) {
+        return await this._replaceValue(res);
+      } else {
+        return res;
+      }
+    } else {
+      return obj;
+    }
+  }
+
+  async _replaceValue(config) {
     if (config.valueTransform == 'replaceByFileContents') {
       return new Promise((resolve, reject) => {
         this._fs.readFile(config.path, (error, data) => {

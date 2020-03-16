@@ -6,10 +6,10 @@ export class InfCo {
   }
 
   async process(tasks, hosts) {
-    let hostList = await this._transformValues(hosts);
-    let varList = await this._transformValues(tasks.vars || {});
+    let hostList = await this._valueTransformer.transform(hosts);
+    let varList = await this._valueTransformer.transform(tasks.vars || {});
     this._valueTransformer.registerVars(varList);
-    let taskList = await this._transformValues(tasks.tasks);
+    let taskList = await this._valueTransformer.transform(tasks.tasks);
     let taskTags = tasks.tags || [];
     let filteredHostList = this._filterHostsByTags(hostList.hosts, taskTags);
 
@@ -46,34 +46,5 @@ export class InfCo {
   
   _filterHostsByTags(hosts, tags) {
     return hosts.filter(host => (host.tags || []).some(tag => tags.includes(tag)));
-  }
-
-  async _transformValues(obj) {
-    if (obj instanceof Array) {
-      for (let idx in obj) {
-        obj[idx] = await this._transformValues(obj[idx]);
-      }
-      return obj;
-    } else if (obj instanceof Object) {
-      let res = {};
-    
-      for (let key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          if (obj[key] instanceof Object) {
-            if (obj[key].valueTransform) {
-              res[key] = await this._valueTransformer.transform(obj[key]);
-            } else {
-              res[key] = await this._transformValues(obj[key]);
-            }
-          } else {
-            res[key] = obj[key];
-          }
-        }
-      }
-    
-      return res;
-    } else {
-      return obj;
-    }
   }
 }

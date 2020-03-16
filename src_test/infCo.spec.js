@@ -1,4 +1,5 @@
 import {InfCo} from '../bld/infCo';
+import {ValueTransformer} from '../bld/valueTransformer';
 
 describe("InfCo", function() {
   it("can filter hosts by tags", async function() {
@@ -11,5 +12,25 @@ describe("InfCo", function() {
     let tags = ["test2"];
 
     expect(infCo._filterHostsByTags(hosts, tags)).toEqual([{tags: ["test2"]}]);
+  });
+
+  it("can process task and host lists", async function() {
+    let infCo = new InfCo(new ValueTransformer());
+    let hostList = {
+      hosts: [
+        {tags: ["test1"]},
+        {tags: ["test2"]},
+        {tags: ["test3"]}
+      ]
+    };
+    let taskList = {
+      tasks: [
+        {
+          title: {valueTransform: 'prefixSuffix', value: 'test', prefix: '*'}
+        }
+      ]
+    };
+
+    await infCo.process(taskList, hostList);
   });
 });
