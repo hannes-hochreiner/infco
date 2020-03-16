@@ -16,6 +16,12 @@ describe("ValueTransformer", function() {
     vt.registerVars({
       test1: "test2"
     });
-    expect(await vt.transform({"valueTransform":"var", "name":"test1", "prefix": "_", "suffix": "*"})).toEqual("_test2*");
+    expect(await vt.transform({"valueTransform":"var", "name":"test1"})).toEqual("test2");
+  });
+
+  it("can add a prefix and a suffix", async function() {
+    let vt = new ValueTransformer();
+
+    expect(await vt.transform({"valueTransform":"prefixSuffix", "text":"test1", "prefix": "_", "suffix": "*"})).toEqual("_test1*");
   });
 });
