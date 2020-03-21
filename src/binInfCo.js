@@ -17,6 +17,7 @@ import { TaskCouchDbDoc } from './taskCouchDbDoc';
 import { TaskDockerContainer } from './taskDockerContainer';
 import { TaskDockerNetwork } from './taskDockerNetwork';
 import { TaskGitHubDeployLatestRelease } from './taskGitHubDeployLatestRelease';
+import { TaskLineInFile } from './taskLineInFile';
 
 commander.command('encrypt <value>')
   .action(cmdEncrypt);
@@ -48,7 +49,8 @@ async function cmdProcess(cmdObj) {
       couchDbDocument: TaskCouchDbDoc,
       dockerContainer: TaskDockerContainer,
       dockerNetwork: TaskDockerNetwork,
-      gitHubDeployLatestRelease: TaskGitHubDeployLatestRelease
+      gitHubDeployLatestRelease: TaskGitHubDeployLatestRelease,
+      lineInFile: TaskLineInFile
     };
     let contextDict = {
       contextSsh: new ContextSsh(new Client(), net, Axios)

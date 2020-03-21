@@ -29,6 +29,14 @@ export class ContextSshTransfer {
     });
   }
 
+  createReadStream(path, options) {
+    return this._sftp.createReadStream(path, options);
+  }
+
+  createWriteStream(path, options) {
+    return this._sftp.createWriteStream(path, options);
+  }
+
   async open() {
     this._sftp = await this._contextSsh.sftp();
   }
