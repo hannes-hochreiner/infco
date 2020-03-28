@@ -19,6 +19,8 @@ import { TaskDockerNetwork } from './taskDockerNetwork';
 import { TaskGitHubDeployLatestRelease } from './taskGitHubDeployLatestRelease';
 import { TaskLineInFile } from './taskLineInFile';
 
+const valueTransformer = new ValueTransformer(fs, crypto, Date);
+
 commander.command('encrypt <value>')
   .action(cmdEncrypt);
 commander.command('process')
@@ -55,7 +57,6 @@ async function cmdProcess(cmdObj) {
     let contextDict = {
       contextSsh: new ContextSsh(new Client(), net, Axios)
     };
-    const valueTransformer = new ValueTransformer(fs, crypto);
 
     let infCo = new InfCo(valueTransformer, contextDict, taskDict);
 

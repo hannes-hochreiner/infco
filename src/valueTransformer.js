@@ -1,8 +1,9 @@
 export class ValueTransformer {
-  constructor(fs, crypto) {
+  constructor(fs, crypto, DateType) {
     this._fs = fs;
     this._crypto = crypto;
     this._vars = {};
+    this._DateType = DateType;
   }
 
   registerVars(vars) {
@@ -94,7 +95,7 @@ export class ValueTransformer {
         throw new Error(`Part "${part}" unknown.`);
       }
 
-      let res = (new Date()).toISOString();
+      let res = (new this._DateType()).toISOString();
 
       if (part === 'date') {
         res = res.substr(0,10);
