@@ -1,7 +1,7 @@
 export class TaskRequest {
-  static async run(context, config) {
+  async run(context, config) {
     let ctxRequ;
-    let [ctxConfig, reqConfig] = TaskRequest.processConfig(config);
+    let [ctxConfig, reqConfig] = this.processConfig(config);
 
     try {
       ctxRequ = context.createRequest();
@@ -16,7 +16,7 @@ export class TaskRequest {
     return 'executed';
   }
 
-  static processConfig(config) {
+  processConfig(config) {
     let ctxPropNames = ['protocol', 'host', 'port', 'socketPath'];
     let ctxConfig = {};
     let reqConfig = {};

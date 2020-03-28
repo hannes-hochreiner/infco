@@ -1,5 +1,5 @@
 export class TaskDockerContainer {
-  static async run(context, config) {
+  async run(context, config) {
     let ctxRequ;
     let ctxConfig = {
       protocol: config.protocol || 'http',
@@ -54,7 +54,7 @@ export class TaskDockerContainer {
     }
   }
 
-  static async createContainer(ctxRequ, config) {
+  async createContainer(ctxRequ, config) {
     let reqConfig = {};
 
     reqConfig.method = 'post';
@@ -83,7 +83,7 @@ export class TaskDockerContainer {
     await ctxRequ.request(reqConfig);
   }
 
-  static async startContainer(ctxRequ, config) {
+  async startContainer(ctxRequ, config) {
     let reqConfig = {};
 
     reqConfig.method = 'post';
@@ -92,7 +92,7 @@ export class TaskDockerContainer {
     await ctxRequ.request(reqConfig);
   }
 
-  static async restartContainer(ctxRequ, config) {
+  async restartContainer(ctxRequ, config) {
     let reqConfig = {};
 
     reqConfig.method = 'post';

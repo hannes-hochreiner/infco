@@ -1,5 +1,5 @@
 export class TaskTransfer {
-  static async run(context, config) {
+  async run(context, config) {
     let ctxTrans;
 
     try {

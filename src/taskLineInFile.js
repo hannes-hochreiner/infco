@@ -1,5 +1,5 @@
 export class TaskLineInFile {
-  static async run(context, config) {
+  async run(context, config) {
     let ctxExec;
     let ctxTrans;
 

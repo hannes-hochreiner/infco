@@ -44,15 +44,15 @@ async function cmdProcess(cmdObj) {
     let hosts = await readJson(cmdObj.hosts);
     let tasks = await readJson(cmdObj.tasks);
     let taskDict = {
-      exec: TaskExec,
-      request: TaskRequest,
-      transfer: TaskTransfer,
-      couchDb: TaskCouchDb,
-      couchDbDocument: TaskCouchDbDoc,
-      dockerContainer: TaskDockerContainer,
-      dockerNetwork: TaskDockerNetwork,
-      gitHubDeployLatestRelease: TaskGitHubDeployLatestRelease,
-      lineInFile: TaskLineInFile
+      exec: new TaskExec(),
+      request: new TaskRequest(),
+      transfer: new TaskTransfer(),
+      couchDb: new TaskCouchDb(),
+      couchDbDocument: new TaskCouchDbDoc(),
+      dockerContainer: new TaskDockerContainer(),
+      dockerNetwork: new TaskDockerNetwork(),
+      gitHubDeployLatestRelease: new TaskGitHubDeployLatestRelease(),
+      lineInFile: new TaskLineInFile()
     };
     let contextDict = {
       contextSsh: new ContextSsh(new Client(), net, Axios)

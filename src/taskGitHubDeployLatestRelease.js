@@ -1,5 +1,5 @@
 export class TaskGitHubDeployLatestRelease {
-  static async run(context, config) {
+  async run(context, config) {
     let ctxExec;
 
     try {

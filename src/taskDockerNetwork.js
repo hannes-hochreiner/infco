@@ -1,5 +1,5 @@
 export class TaskDockerNetwork {
-  static async run(context, config) {
+  async run(context, config) {
     let ctxRequ;
     let ctxConfig = {
       protocol: config.protocol || 'http',
