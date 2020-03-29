@@ -7,6 +7,7 @@ import * as net from 'net';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import * as path from 'path';
+import * as child_process from 'child_process';
 import { default as commander } from 'commander';
 import { InfCo } from './infCo';
 import { ValueTransformer } from './valueTransformer';
@@ -58,7 +59,8 @@ async function cmdProcess(cmdObj) {
       reviewBackups: new TaskReviewBackups(Date, path)
     };
     let contextDict = {
-      contextSsh: new ContextSsh(new Client(), net, Axios)
+      contextSsh: new ContextSsh(new Client(), net, Axios),
+      contextLocal: new contextLocal(child_process)
     };
 
     let infCo = new InfCo(valueTransformer, contextDict, taskDict);
