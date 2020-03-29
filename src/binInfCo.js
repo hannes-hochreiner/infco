@@ -2,6 +2,7 @@
 
 import { Client } from "ssh2";
 import { ContextSsh } from './contextSsh';
+import { ContextLocal } from './contextLocal';
 import { default as Axios } from 'axios';
 import * as net from 'net';
 import * as fs from 'fs';
@@ -60,7 +61,7 @@ async function cmdProcess(cmdObj) {
     };
     let contextDict = {
       contextSsh: new ContextSsh(new Client(), net, Axios),
-      contextLocal: new contextLocal(child_process)
+      contextLocal: new ContextLocal(child_process)
     };
 
     let infCo = new InfCo(valueTransformer, contextDict, taskDict);
