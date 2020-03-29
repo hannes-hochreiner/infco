@@ -6,6 +6,7 @@ import { default as Axios } from 'axios';
 import * as net from 'net';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
+import * as path from 'path';
 import { default as commander } from 'commander';
 import { InfCo } from './infCo';
 import { ValueTransformer } from './valueTransformer';
@@ -18,6 +19,7 @@ import { TaskDockerContainer } from './taskDockerContainer';
 import { TaskDockerNetwork } from './taskDockerNetwork';
 import { TaskGitHubDeployLatestRelease } from './taskGitHubDeployLatestRelease';
 import { TaskLineInFile } from './taskLineInFile';
+import { TaskReviewBackups } from "../bld/taskReviewBackups";
 
 const valueTransformer = new ValueTransformer(fs, crypto, Date);
 
@@ -52,7 +54,8 @@ async function cmdProcess(cmdObj) {
       dockerContainer: new TaskDockerContainer(),
       dockerNetwork: new TaskDockerNetwork(),
       gitHubDeployLatestRelease: new TaskGitHubDeployLatestRelease(),
-      lineInFile: new TaskLineInFile()
+      lineInFile: new TaskLineInFile(),
+      reviewBackups: new TaskReviewBackups(Date, path)
     };
     let contextDict = {
       contextSsh: new ContextSsh(new Client(), net, Axios)
