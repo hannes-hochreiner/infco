@@ -10,6 +10,7 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { default as commander } from 'commander';
+import { default as Mustache } from 'mustache';
 import { InfCo } from './infCo';
 import { ValueTransformer } from './valueTransformer';
 import { TaskExec } from './taskExec';
@@ -21,7 +22,8 @@ import { TaskDockerContainer } from './taskDockerContainer';
 import { TaskDockerNetwork } from './taskDockerNetwork';
 import { TaskGitHubDeployLatestRelease } from './taskGitHubDeployLatestRelease';
 import { TaskLineInFile } from './taskLineInFile';
-import { TaskReviewBackups } from "../bld/taskReviewBackups";
+import { TaskReviewBackups } from './taskReviewBackups';
+import { TaskFileFromTemplate } from './taskFileFromTemplate';
 
 const valueTransformer = new ValueTransformer(fs, crypto, Date);
 
@@ -57,7 +59,8 @@ async function cmdProcess(cmdObj) {
       dockerNetwork: new TaskDockerNetwork(),
       gitHubDeployLatestRelease: new TaskGitHubDeployLatestRelease(),
       lineInFile: new TaskLineInFile(),
-      reviewBackups: new TaskReviewBackups(Date, path)
+      reviewBackups: new TaskReviewBackups(Date, path),
+      fileFromTemplate: new TaskFileFromTemplate(Mustache)
     };
     let contextDict = {
       contextSsh: new ContextSsh(new Client(), net, Axios),

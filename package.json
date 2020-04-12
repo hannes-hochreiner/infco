@@ -21,6 +21,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "commander": "^4.1.1",
+    "mustache": "^4.0.1",
     "ssh2": "^0.8.8"
   },
   "devDependencies": {
