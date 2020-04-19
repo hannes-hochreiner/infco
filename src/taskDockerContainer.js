@@ -64,13 +64,17 @@ export class TaskDockerContainer {
     };
     reqConfig.data = {
       Image: config.image,
-      HostConfig: {
-        RestartPolicy: {
-          Name: "on-failure",
-          MaximumRetryCount: 10
-        }
-      }
+      HostConfig: {}
     };
+
+    if (typeof config.autoremove !== 'undefined' && config.autoremove == true) {
+      reqConfig.data.HostConfig.AutoRemove = true;
+    } else {
+      reqConfig.data.HostConfig.RestartPolicy = {
+        Name: "on-failure",
+        MaximumRetryCount: 10
+      }
+    }
 
     if (typeof config.env !== 'undefined') {
       reqConfig.data.Env = Object.getOwnPropertyNames(config.env).map(elem => `${elem}=${config.env[elem]}`);
