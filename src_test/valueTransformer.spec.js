@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as crypto from 'crypto';
+import { default as Mustache } from 'mustache';
 import {ValueTransformer} from '../bld/valueTransformer';
 
 describe("ValueTransformer", function() {
@@ -37,5 +38,11 @@ describe("ValueTransformer", function() {
     let vt = new ValueTransformer(fs, crypto, Date.bind(null, '1995-12-17T03:24:00'));
 
     expect(await vt.transform({"valueTransform":"utcTimestamp"})).toEqual((new Date('1995-12-17T03:24:00')).toISOString());
+  });
+
+  it("can fill a template", async function() {
+    let vt = new ValueTransformer(fs, crypto, Date.bind(null, '1995-12-17T03:24:00'), Mustache);
+
+    expect(await vt.transform({"valueTransform":"fillTemplate", "template": "1{{test}}2", "data": {"test": "data"}})).toEqual('1data2');
   });
 });

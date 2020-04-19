@@ -1,9 +1,10 @@
 export class ValueTransformer {
-  constructor(fs, crypto, DateType) {
+  constructor(fs, crypto, DateType, mustache) {
     this._fs = fs;
     this._crypto = crypto;
     this._vars = {};
     this._DateType = DateType;
+    this._mustache = mustache;
   }
 
   registerVars(vars) {
@@ -102,6 +103,8 @@ export class ValueTransformer {
       }
 
       return Promise.resolve(res);
+    } else if (config.valueTransform == 'fillTemplate') {
+      return Promise.resolve(this._mustache.render(config.template, config.data));
     }
 
     throw new Error(`Unknown value transform "${config.valueTransform}".`);

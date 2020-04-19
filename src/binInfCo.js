@@ -25,7 +25,7 @@ import { TaskLineInFile } from './taskLineInFile';
 import { TaskReviewBackups } from './taskReviewBackups';
 import { TaskFileFromTemplate } from './taskFileFromTemplate';
 
-const valueTransformer = new ValueTransformer(fs, crypto, Date);
+const valueTransformer = new ValueTransformer(fs, crypto, Date, Mustache);
 
 commander.command('encrypt <value>')
   .action(cmdEncrypt);
