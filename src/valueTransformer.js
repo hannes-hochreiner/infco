@@ -5,6 +5,7 @@ export class ValueTransformer {
     this._vars = {};
     this._DateType = DateType;
     this._mustache = mustache;
+    this._mustache.escape = function(text) {return text;};
   }
 
   registerVars(vars) {
@@ -32,7 +33,7 @@ export class ValueTransformer {
         }
       }
     
-      if (obj.valueTransform) {
+      if (obj.transform) {
         return await this._replaceValue(res);
       } else {
         return res;
@@ -43,7 +44,7 @@ export class ValueTransformer {
   }
 
   async _replaceValue(config) {
-    if (config.valueTransform == 'replaceByFileContents') {
+    if (config.transform == 'fileContents') {
       return new Promise((resolve, reject) => {
         this._fs.readFile(config.path, (error, data) => {
           if (error) {
@@ -60,7 +61,7 @@ export class ValueTransformer {
           }
         });
       });
-    } else if (config.valueTransform == 'decrypt') {
+    } else if (config.transform == 'decrypt') {
       if (typeof this._decryptionPassword === 'undefined') {
         this._decryptionPassword = await this.prompt('Please enter the decryption password: ');
       }
@@ -71,18 +72,18 @@ export class ValueTransformer {
       
       decrypted += decipher.final('utf8');
       return Promise.resolve(decrypted);
-    } else if (config.valueTransform == 'var') {
+    } else if (config.transform == 'var') {
       if (!this._vars.hasOwnProperty(config.name)) {
         throw new Error(`Property "${config.name}" is not registered with the value transformer.`);
       }
 
       return Promise.resolve(this._vars[config.name]);
-    } else if (config.valueTransform == 'prefixSuffix') {
+    } else if (config.transform == 'prefixSuffix') {
       let prefix = config.prefix || '';
       let suffix = config.suffix || '';
 
       return Promise.resolve(`${prefix}${config.text}${suffix}`);
-    } else if (config.valueTransform == 'utcTimestamp') {
+    } else if (config.transform == 'utcTimestamp') {
       const formatOptions = ['ISO'];
       const partOptions = ['full', 'date'];
       let format = config.format || 'ISO';
@@ -103,8 +104,8 @@ export class ValueTransformer {
       }
 
       return Promise.resolve(res);
-    } else if (config.valueTransform == 'fillTemplate') {
-      return Promise.resolve(this._mustache.render(config.template, config.data));
+    } else if (config.transform == 'template') {
+      return Promise.resolve(this._mustache.render(config.template, this._vars));
     }
 
     throw new Error(`Unknown value transform "${config.valueTransform}".`);

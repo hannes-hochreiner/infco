@@ -1,5 +1,6 @@
 import {InfCo} from '../bld/infCo';
 import {ValueTransformer} from '../bld/valueTransformer';
+import { default as Mustache } from 'mustache';
 
 describe("InfCo", function() {
   it("can filter hosts by tags", async function() {
@@ -15,7 +16,7 @@ describe("InfCo", function() {
   });
 
   it("can process task and host lists", async function() {
-    let infCo = new InfCo(new ValueTransformer());
+    let infCo = new InfCo(new ValueTransformer(null, null, null, Mustache));
     let hostList = {
       hosts: [
         {tags: ["test1"]},
