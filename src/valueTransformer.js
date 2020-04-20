@@ -78,11 +78,6 @@ export class ValueTransformer {
       }
 
       return Promise.resolve(this._vars[config.name]);
-    } else if (config.transform == 'prefixSuffix') {
-      let prefix = config.prefix || '';
-      let suffix = config.suffix || '';
-
-      return Promise.resolve(`${prefix}${config.text}${suffix}`);
     } else if (config.transform == 'utcTimestamp') {
       const formatOptions = ['ISO'];
       const partOptions = ['full', 'date'];

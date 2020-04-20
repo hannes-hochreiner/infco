@@ -23,12 +23,6 @@ describe("ValueTransformer", function() {
     expect(await vt.transform({transform: 'template', template: {transform:'template', template:'{{testInner}}'}})).toEqual("-test1+");
   });
 
-  it("can add a prefix and a suffix", async function() {
-    let vt = new ValueTransformer(fs, crypto, Date, Mustache);
-
-    expect(await vt.transform({"transform":"prefixSuffix", "text":"test1", "prefix": "_", "suffix": "*"})).toEqual("_test1*");
-  });
-
   it("can insert a date", async function() {
     let vt = new ValueTransformer(fs, crypto, Date, Mustache);
 
