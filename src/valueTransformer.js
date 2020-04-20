@@ -72,12 +72,6 @@ export class ValueTransformer {
       
       decrypted += decipher.final('utf8');
       return Promise.resolve(decrypted);
-    } else if (config.transform == 'var') {
-      if (!this._vars.hasOwnProperty(config.name)) {
-        throw new Error(`Property "${config.name}" is not registered with the value transformer.`);
-      }
-
-      return Promise.resolve(this._vars[config.name]);
     } else if (config.transform == 'utcTimestamp') {
       const formatOptions = ['ISO'];
       const partOptions = ['full', 'date'];
