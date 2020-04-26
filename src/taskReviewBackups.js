@@ -1,5 +1,6 @@
 export class TaskReviewBackups {
-  constructor(DateType, path) {
+  constructor(logger, DateType, path) {
+    this._logger = logger;
     this._DateType = DateType;
     this._path = path;
   }
@@ -63,13 +64,12 @@ export class TaskReviewBackups {
 
       deleteList.forEach(async (elem) => {
         await ctxExec.exec(`rm ${this._path.join(config.path, elem)}`);
+        this._logger.update(`deleted file "${this._path.join(config.path, elem)}"`);
       });
     } finally {
       if (typeof ctxExec !== 'undefined') {
         await ctxExec.close();
       }
     }
-
-    return 'executed';
   }
 }

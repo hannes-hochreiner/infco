@@ -1,4 +1,8 @@
 export class TaskCouchDbDoc {
+  constructor(logger) {
+    this._logger = logger;
+  }
+
   async run(context, config) {
     let ctxRequ;
     let ctxConfig = {
@@ -42,7 +46,8 @@ export class TaskCouchDbDoc {
       let newDoc = JSON.parse(config.content);
   
       if (typeof data != 'undefined' && JSON.stringify(data).localeCompare(JSON.stringify(newDoc)) == 0) {
-        return 'ok';
+        this._logger.info(`document at "${config.url}" is up to date`);
+        return;
       }
 
       newDoc._id = id;
@@ -50,9 +55,10 @@ export class TaskCouchDbDoc {
 
       reqConfig.method = 'put';
       reqConfig.data = newDoc;
+
       await ctxRequ.request(reqConfig);
 
-      return 'updated';
+      this._logger.update(`document at "${config.url}" was updated`);
     } finally {
       if (typeof ctxRequ !== 'undefined') {
         await ctxRequ.close();

@@ -124,7 +124,7 @@ export class ValueTransformer {
       });
       cipher.on('end', () => {
         resolve({
-          valueTransform: 'decrypt',
+          transform: 'decrypt',
           salt: salt.toString('hex'),
           iv: iv.toString('hex'),
           cipherAlgorithm: cipherAlgorithm,

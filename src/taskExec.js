@@ -1,17 +1,23 @@
 export class TaskExec {
+  constructor(logger) {
+    this._logger = logger;
+  }
+
   async run(context, config) {
-    let ctxExec;
+    let ctxExec = context.createExec();
 
     try {
-      ctxExec = context.createExec();
       await ctxExec.open();
-      await ctxExec.exec(config.command);
+      let commands = [config.command].flat(Infinity);
+
+      for (const command of commands) {
+        await ctxExec.exec(command);
+        this._logger.update(`executed command "${command}"`);
+      }
     } finally {
       if (typeof ctxExec !== 'undefined') {
         await ctxExec.close();
       }
     }
-
-    return 'executed';
   }
 }

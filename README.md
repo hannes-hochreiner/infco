@@ -65,46 +65,414 @@ The UTC timestamp transform provides a timestamp.
 
 # Tasks
 
-## Docker Container
+## Exec
+Executes a command or a series of commands.
+
+*config*
+  * command (string | array of string)
+
 ```JSON
 {
-  "type": "dockerContainer",
-  "title": "create and start container",
+  "type": "exec",
+  "title": "create a directory",
   "config": {
-    "containerName": "test",
-    "actions": [
-      {"action": "create", "data": {
-        "Image": "couchdb",
-        "Env": [
-          {"valueTransform": "fillTemplate", "template": "COUCHDB_USER={{user}}", "data": }
-        ],
-        "HostConfig": {
-          "RestartPolicy": {"Name": "on-failure", "MaximumRetryCount": 10},
-          "Binds": [
-            "/opt/bookmark/couchdb/data:/opt/couchdb/data:z",
-            "/opt/bookmark/couchdb/config:/opt/couchdb/etc/local.d:z"
-          ]
-        }
-      }},
-      {"action": "start"}
+    "command": [
+      "mkdir /tmp/test",
+      "touch /tmp/test/test.txt"
     ]
-    "image": "couchdb",
-    "volumes": [
-      "/opt/bookmark/couchdb/data:/opt/couchdb/data:z",
-      "/opt/bookmark/couchdb/config:/opt/couchdb/etc/local.d:z"
-    ],
-    "env": {
-      "COUCHDB_USER": {"valueTransform":"var", "name":"couchDbUsername"},
-      "COUCHDB_PASSWORD": {"valueTransform":"var", "name":"couchDbPassword"}
+  }
+}
+```
+
+## Request
+This task executes a network request.
+In the current implementation all options understood by axios should work.
+
+*config*
+  * host (string)
+  * port (number)
+  * socketPath (string)
+  * url (string)
+  * method (string): e.g. "get", "put", "post", "delete"
+  * ...
+
+Either "host" and "port", or "socketPath" have to be specified.
+
+```JSON
+{
+  "type": "request",
+  "title": "get page",
+  "config": {
+    "protocol": "http",
+    "host": "127.0.0.1",
+    "port": 80,
+    "method": "get",
+    "url": "/",
+  }
+}
+```
+
+## File from String
+Creates a file from with the contents of a string.
+
+*config*
+  * filename (string)
+  * string (string)
+
+```JSON
+{
+  "type": "fileFromString",
+  "title": "create a file from a string",
+  "config": {
+    "filename": "/tmp/test.txt",
+    "string": "test string"
+  }
+}
+```
+
+## Line in File
+This task checks whether a line is in a file.
+If the line is not in the file, it is added as the last line.
+
+*config*
+  * filename (string)
+  * line (string)
+
+```JSON
+{
+  "type": "lineInFile",
+  "title": "put a line of text in a file",
+  "config": {
+    "filename": "/tmp/test.txt",
+    "line": "test string"
+  }
+}
+```
+
+## CouchDb
+This task creates a CouchDb on an existing database instance.
+It also adds the security configuration.
+
+*config*
+  * protocol (string, default: "http")
+  * host (string)
+  * port (number)
+  * socketPath (string)
+  * urlPrefix (string): prefix to be used, if the database is not at root
+  * name (string): name of the database
+  * auth (object): authentication object
+  * auth.username (string)
+  * auth.password (string)
+  * security (object)
+  * security.admins (object)
+  * security.admins.names (array of string): names of admin users
+  * security.admins.roles (array of string): roles of admin users
+  * security.members (object)
+  * security.members.names (array of string): names of members
+  * security.members.roles (array of string): roles of members
+
+Either "host" and "port", or "socketPath" need to be specified.
+If they are not specified, "127.0.0.1" is used as the default host and 5984 as the default port.
+
+```JSON
+{
+  "type": "couchDb",
+  "title": "creating couchDb",
+  "config": {
+    "urlPrefix": "/bookmark_couchdb",
+    "name": "bookmark",
+    "auth": {
+      "username": "couchDbUser",
+      "password": "couchDbPass"
+    },
+    "security": {
+      "admins": { "names": [], "roles": [ "bookmark_admin" ] },
+      "members": { "names": [], "roles": [ "bookmark_read", "bookmark_write" ] }
     }
   }
 }
 ```
 
-# TODOs
-## TaskFileFromTemplate
-Should be able to be simplified or removed, now that the template transform is available.
+## CouchDb Document
+This task checks a document in a CouchDb and updated it, if necessary.
+Most options are the same as for CouchDb task.
+Instead of the "name", "security", and "urlPrefix" options, there is a "url" and a "content" option.
+
+*config*
+  * url (string)
+  * content (string)
+
+```JSON
+{
+  "type": "couchDbDocument",
+  "title": "checking CouchDb document",
+  "config": {
+    "method": "get",
+    "url": "/url",
+    "content": "{\"doc\": \"doc\"}",
+    "auth": {
+      "username": "couchDbUser",
+      "password": "couchDbPass"
+    }
+  }
+}
+```
+
+## Transfer
+This task transfers a file from the local host to a remote host.
+
+*config*
+  * direction (string): either "get" or "put"
+  * remotePath (string)
+  * localPath (string)
+
+```JSON
+{
+  "type": "transfer",
+  "title": "transferring file",
+  "config": {
+    "direction": "put",
+    "localPath": "/tmp/test.txt",
+    "remotePath": "/tmp/test2.txt"
+  }
+}
+```
+
+## Review Backups
+This task reviews a directory with backup files and deletes the ones that are no longer needed.
+The task expects a directory with files that start with the date in the format "YYYY-MM-DD" and end with the configured suffix.
+It then takes the configured dates and sorts the backups into buckets by days past the current date (i.e. bucket 1: today - days[0], days[1] - days[2], days[2] - days[length - 1]).
+From each bucket the oldest file is kept.
+If "0" is configured, the backup from the current days will be kept.
+If the numbers configured in "days" are multiples of the preceding number the number of backups will be equal to the length of the "days" array.
+Otherwise, the number of backups can be one less.
+
+*config*
+  * path (string): path of the backup files
+  * days (array of string)
+  * suffix (string): suffix of backup files
+
+```JSON
+{
+  "type": "reviewBackups",
+  "title": "reviewing backups",
+  "config": {
+    "path": "/backup/",
+    "days": [0,1,7,28],
+    "suffix": "_mydata.zip"
+  }
+}
+```
+
 ## Docker Container
-To avoid listing all possible options, the configuration could just be defined in the form the API expects.
-## Exec
-Allow arrays of commands.
+This task can be used to administrate docker container.
+
+*config*
+  * protocol (string, default: "http")
+  * host (string)
+  * port (number)
+  * socketPath (string, default: "/var/run/docker.sock"): path of a UNIX socket
+  * name (string): container name
+  * data (JSON object): data to be send with the request to create a container (see Docker API)
+  * actions (array of strings): array of actions to perform
+
+Either "host" and "port", or "socketPath" need to be provided.
+If neither is provided, the default value for "socketPath" is used.
+"data" only needs to be provided for the "create" action.
+Allowed values for actions are:
+  * create (create the container, if it does not exist)
+  * start (starts or restarts the container)
+  * stop
+  * wait (waits until the container exits)
+  * remove (removes a container, if it exists)
+
+```JSON
+{
+  "type": "dockerContainer",
+  "title": "create and start container",
+  "config": {
+    "name": "test",
+    "data": {
+      "Image": "couchdb",
+      "Env": [
+        {"transform": "template", "template": "COUCHDB_USER={{user}}"}
+      ],
+      "HostConfig": {
+        "RestartPolicy": {"Name": "on-failure", "MaximumRetryCount": 10},
+        "Binds": [
+          "/opt/bookmark/couchdb/data:/opt/couchdb/data:z",
+          "/opt/bookmark/couchdb/config:/opt/couchdb/etc/local.d:z"
+        ]
+      }
+    },
+    "actions": [
+      "create"
+      "start"
+    ]
+  }
+}
+```
+
+## Docker Image
+This task can be used to administrate Docker Images.
+Currently, only the action "prune" is supported.
+
+*config*
+  * protocol (string, default: "http")
+  * host (string)
+  * port (number)
+  * socketPath (string, default: "/var/run/docker.sock"): path of a UNIX socket
+  * actions (array of string)
+  * images (array of string): image to be created
+
+Either "host" and "port", or "socketPath" need to be provided.
+If neither is provided, the default value for "socketPath" is used.
+Allowed values for actions are:
+  * prune (remove unused images)
+  * create
+
+```JSON
+{
+  "type": "dockerImage",
+  "title": "prune images",
+  "config": {
+    "actions": [
+      "prune"
+    ]
+  }
+}
+```
+
+## Docker Network
+This task can be used to administrate Docker Networks.
+
+*config*
+  * protocol (string, default: "http")
+  * host (string)
+  * port (number)
+  * socketPath (string, default: "/var/run/docker.sock"): path of a UNIX socket
+  * networkName (string)
+  * containers (array of string)
+  * actions (array of string)
+
+Either "host" and "port", or "socketPath" need to be provided.
+If neither is provided, the default value for "socketPath" is used.
+"containers" is only used for the actions "connect", "update", and "disconnect".
+Allowed values for actions are:
+  * create (creates a network, if it does not exist)
+  * connect (adds the containers given in "containers" to the network)
+  * update (adds and removes containers from the network to ensure all containers from "containers" are in the network and only those)
+  * disconnect (removes the containers given in "containers" to the network)
+  * remove (removes a network, if it exists)
+  * prune (removes networks, which are not in use)
+```JSON
+{
+  "type": "dockerNetwork",
+  "title": "confirm network",
+  "config": {
+    "networkName": "couch_test_network",
+    "containers": [
+      "couch_test"
+    ],
+    "actions": [
+      "create",
+      "connect"
+    ]
+  }
+}
+```
+
+## Docker Volume
+This tasks can be used to administrate Docker volumes.
+
+*config*
+  * protocol (string, default: "http")
+  * host (string)
+  * port (number)
+  * socketPath (string, default: "/var/run/docker.sock"): path of a UNIX socket
+  * volumeName (string)
+  * actions (array of string)
+
+Either "host" and "port", or "socketPath" need to be provided.
+If neither is provided, the default value for "socketPath" is used.
+Allowed values for actions are:
+  * create (creates a volume, if it does not exist)
+  * remove (removes a volume, if it exists)
+```JSON
+{
+  "type": "dockerVolume",
+  "title": "create volume",
+  "config": {
+    "volumeName": "couch_test_volume",
+    "actions": [
+      "create"
+    ]
+  }
+}
+```
+
+## Wait
+This task can be used to wait for a fixed amount of time.
+
+*config*
+  * ms (integer): wait time in milliseconds
+
+```JSON
+{
+  "type": "wait",
+  "title": "wait for some time",
+  "config": {
+    "ms": 200
+  }
+}
+```
+
+
+# Complete Examples
+## Creating a file on a remove host from a template
+Host configuration
+```JSON
+{
+  "hosts": [
+    {
+      "title": "Droplet",
+      "tags": ["test"],
+      "context": {
+        "type": "contextSsh",
+        "config": {
+          "host": "167.71.45.63",
+          "port": 22,
+          "username": "root",
+          "privateKey": { "transform": "fileContents", "format": "buffer", "path": "/home/user/.ssh/id_rsa"}
+        }
+      }
+    }
+  ]
+}
+```
+Task configuration
+```JSON
+{
+  "tags": ["test"],
+  "vars": {
+    "value": "testValue"
+  },
+  "tasks": [
+    {
+      "type": "fileFromString",
+      "title": "create file",
+      "config": {
+        "filename": "/tmp/templ.txt",
+        "string": {
+          "transform": "template",
+          "template": {"transform": "fileContents", "format": "string", "path": "exampleFiles/test.tmpl"}
+        }
+      }
+    }
+  ]
+}
+```
+Command
+```shell
+infco process -h hostConfig.json -t taskConfig.json
+```

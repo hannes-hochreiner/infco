@@ -11,10 +11,10 @@ export class SequenceSpy {
   fun(funName, ...args) {
     let step = this._config.shift();
 
-    expect(step.name).toEqual(funName);
+    expect(funName).toEqual(step.name);
 
     if (typeof step.args !== 'undefined') {
-      expect(step.args).toEqual(args);
+      expect(args).toEqual(step.args);
     }
 
     if (typeof step.return !== 'undefined') {

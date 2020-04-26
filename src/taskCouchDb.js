@@ -1,6 +1,9 @@
 export class TaskCouchDb {
+  constructor(logger) {
+    this._logger = logger;
+  }
+
   async run(context, config) {
-    let returnString = 'ok';
     let ctxRequ;
     let ctxConfig = {
       protocol: config.protocol || 'http',
@@ -30,7 +33,9 @@ export class TaskCouchDb {
           url: `${config.urlPrefix}/${config.name}`,
           auth: config.auth
         });
-        returnString = 'updated';
+        this._logger.update(`created database "${config.name}"`);
+      } else {
+        this._logger.info(`database "${config.name}" already exists`);
       }
 
       let securityDoc = (await ctxRequ.request({
@@ -46,10 +51,10 @@ export class TaskCouchDb {
           auth: config.auth,
           data: config.security
         });
-        returnString = 'updated';
+        this._logger.update(`updated security configuration for database "${config.name}"`);
+      } else {
+        this._logger.info(`security configuration for database "${config.name}" is up to date`);
       }
-
-      return returnString;
     } finally {
       if (typeof ctxRequ !== 'undefined') {
         await ctxRequ.close();

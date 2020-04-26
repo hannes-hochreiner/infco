@@ -1,6 +1,6 @@
-export class TaskFileFromTemplate {
-  constructor(mustache) {
-    this._mustache = mustache;
+export class TaskFileFromString {
+  constructor(logger) {
+    this._logger = logger;
   }
 
   async run(context, config) {
@@ -20,8 +20,9 @@ export class TaskFileFromTemplate {
 
       await (new Promise((resolve, reject) => {
         writeStream.on('error', error => reject(error));
-        writeStream.write(this._mustache.render(config.template, config.data), () => {
+        writeStream.write(config.string, () => {
           writeStream.end();
+          this._logger.update(`wrote file "${config.filename}"`);
           resolve();
         });
       }));
@@ -33,7 +34,5 @@ export class TaskFileFromTemplate {
         await ctxTrans.close();
       }
     }
-
-    return 'updated';
   }
 }

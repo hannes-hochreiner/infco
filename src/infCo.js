@@ -37,7 +37,8 @@ export class InfCo {
           throw new Error(`Task "${task.type}" is unknown.`);
         }
 
-        console.log(`${task.title}: ${(await this._taskDict[task.type].run(context, task.config))}`);
+        console.log(task.title);
+        await this._taskDict[task.type].run(context, task.config);
       }
     } finally {
       context.close();

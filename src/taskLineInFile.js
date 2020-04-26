@@ -1,4 +1,8 @@
 export class TaskLineInFile {
+  constructor(logger) {
+    this._logger = logger;
+  }
+
   async run(context, config) {
     let ctxExec;
     let ctxTrans;
@@ -28,7 +32,8 @@ export class TaskLineInFile {
 
       // check whether line is contained
       if (lines.includes(config.line)) {
-        return 'ok';
+        this._logger.info(`line is already present in file "${config.filename}"`);
+        return;
       }
 
       // pop off trailing line break
@@ -65,6 +70,7 @@ export class TaskLineInFile {
       }
     }
 
-    return 'updated';
+    this._logger.update(`line was added to file "${config.filename}"`);
+    return;
   }
 }

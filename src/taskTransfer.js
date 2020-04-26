@@ -1,4 +1,8 @@
 export class TaskTransfer {
+  constructor(logger) {
+    this._logger = logger;
+  }
+
   async run(context, config) {
     let ctxTrans;
 
@@ -8,8 +12,10 @@ export class TaskTransfer {
 
       if (config.direction == 'get') {
         await ctxTrans.get(config.remotePath, config.localPath);
+        this._logger.update(`received file from "${config.remotePath}" to "${config.localPath}"`);
       } else if (config.direction == 'put') {
         await ctxTrans.put(config.localPath, config.remotePath);
+        this._logger.update(`transmitted file from "${config.localPath}" to "${config.remotePath}"`);
       } else {
         throw new Error(`Unknown transfer direction "${config.direction}".`);
       }
@@ -18,7 +24,5 @@ export class TaskTransfer {
         await ctxTrans.close();
       }
     }
-
-    return 'transferred';
   }
 }

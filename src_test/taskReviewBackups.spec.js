@@ -20,7 +20,9 @@ describe("TaskReviewBackups", function() {
       suffix: '_test.txt'
     };
 
-    let trb = new TaskReviewBackups(Date.bind(null, '2020-02-04'), path);
+    let trb = new TaskReviewBackups(new SequenceSpy([
+      {name: 'update', args:['deleted file "/test/2020-02-02_test.txt"']}
+    ]), Date.bind(null, '2020-02-04'), path);
     
     await trb.run(context, config);
   });
@@ -43,7 +45,10 @@ describe("TaskReviewBackups", function() {
       suffix: '_test.txt'
     };
 
-    let trb = new TaskReviewBackups(Date.bind(null, '2020-02-04'), path);
+    let trb = new TaskReviewBackups(new SequenceSpy([
+      {name: 'update', args: ['deleted file "/test/2020-02-04_test.txt"']},
+      {name: 'update', args: ['deleted file "/test/2019-01-20_test.txt"']}
+    ]),Date.bind(null, '2020-02-04'), path);
     
     await trb.run(context, config);
   });

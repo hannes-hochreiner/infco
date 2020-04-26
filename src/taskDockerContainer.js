@@ -1,4 +1,8 @@
 export class TaskDockerContainer {
+  constructor(logger) {
+    this._logger = logger;
+  }
+
   async run(context, config) {
     let ctxRequ;
     let ctxConfig = {
@@ -12,41 +16,25 @@ export class TaskDockerContainer {
       ctxConfig.socketPath = '/var/run/docker.sock';
     }
 
-    let returnString = 'ok';
-
     try {
       ctxRequ = context.createRequest();
       await ctxRequ.open(ctxConfig);
 
-      let containerList = (await ctxRequ.request({
-        method: 'get',
-        url: '/containers/json',
-        params: {
-          all: true
+      for (let action of config.actions) {
+        if (action == 'create') {
+          await this.createContainer(ctxRequ, config);
+        } else if (action == 'start') {
+          await this.startContainer(ctxRequ, config);
+        } else if (action == 'stop') {
+          await this.stopContainer(ctxRequ, config);
+        } else if (action == 'wait') {
+          await this.waitForContainer(ctxRequ, config);
+        } else if (action == 'remove') {
+          await this.removeContainer(ctxRequ, config);
+        } else {
+          throw new Error(`unknown action "${action}"`);
         }
-      })).data;
-
-      let container = containerList.find(elem => elem.Names.includes(`/${config.containerName}`));
-
-      if (typeof container === 'undefined') {
-        await this.createContainer(ctxRequ, config);
-        returnString = 'updated';
       }
-
-      container = (await ctxRequ.request({
-        method: 'get',
-        url: `/containers/${config.containerName}/json`
-      })).data;
-
-      if (container.State.Status !== 'running') {
-        await this.startContainer(ctxRequ, config);
-        returnString = 'updated';
-      } else if (config.restart) {
-        await this.restartContainer(ctxRequ, config);
-        returnString = 'restarted';
-      }
-
-      return returnString;
     } finally {
       if (typeof ctxRequ !== 'undefined') {
         await ctxRequ.close();
@@ -54,54 +42,112 @@ export class TaskDockerContainer {
     }
   }
 
-  async createContainer(ctxRequ, config) {
-    let reqConfig = {};
-
-    reqConfig.method = 'post';
-    reqConfig.url = '/containers/create';
-    reqConfig.params = {
-      name: config.containerName
-    };
-    reqConfig.data = {
-      Image: config.image,
-      HostConfig: {}
-    };
-
-    if (typeof config.autoremove !== 'undefined' && config.autoremove == true) {
-      reqConfig.data.HostConfig.AutoRemove = true;
-    } else {
-      reqConfig.data.HostConfig.RestartPolicy = {
-        Name: "on-failure",
-        MaximumRetryCount: 10
+  async getInfo(ctxRequ, config) {
+    let containerList = (await ctxRequ.request({
+      method: 'get',
+      url: '/containers/json',
+      params: {
+        all: true
       }
+    })).data;
+
+    return containerList.find(elem => elem.Names.includes(`/${config.name}`));
+  }
+
+  async createContainer(ctxRequ, config) {
+    let cInfo = await this.getInfo(ctxRequ, config);
+
+    if (typeof cInfo !== 'undefined') {
+      this._logger.info(`container "${config.name}" already exists`);
+      return;
     }
 
-    if (typeof config.env !== 'undefined') {
-      reqConfig.data.Env = Object.getOwnPropertyNames(config.env).map(elem => `${elem}=${config.env[elem]}`);
-    }
+    await ctxRequ.request({
+      method: 'post',
+      url: '/containers/create',
+      params: {
+        name: config.name
+      },
+      data: config.data
+    });
 
-    if (typeof config.volumes !== 'undefined') {
-      reqConfig.data.HostConfig.Binds = config.volumes;
-    }
-
-    await ctxRequ.request(reqConfig);
+    this._logger.update(`container "${config.name}" was created`);
   }
 
   async startContainer(ctxRequ, config) {
-    let reqConfig = {};
+    let cInfo = await this.getInfo(ctxRequ, config);
 
-    reqConfig.method = 'post';
-    reqConfig.url = `/containers/${config.containerName}/start`;
+    if (typeof cInfo == 'undefined') {
+      throw new Error(`container "${config.name}" does not exist`);
+    }
 
-    await ctxRequ.request(reqConfig);
+    if (cInfo.State == 'running') {
+      await ctxRequ.request({
+        method: 'post',
+        url: `/containers/${config.name}/restart`
+      });
+      this._logger.update(`container "${config.name}" was restarted`);
+    } else {
+      await ctxRequ.request({
+        method: 'post',
+        url: `/containers/${config.name}/start`
+      });
+      this._logger.update(`container "${config.name}" was started`);
+    }
   }
 
-  async restartContainer(ctxRequ, config) {
-    let reqConfig = {};
+  async stopContainer(ctxRequ, config) {
+    let cInfo = await this.getInfo(ctxRequ, config);
 
-    reqConfig.method = 'post';
-    reqConfig.url = `/containers/${config.containerName}/restart`;
+    if (typeof cInfo == 'undefined') {
+      throw new Error(`container "${config.name}" does not exist`);
+    }
 
-    await ctxRequ.request(reqConfig);
+    if (cInfo.State == 'running') {
+      await ctxRequ.request({
+        method: 'post',
+        url: `/containers/${config.name}/stop`
+      });
+      this._logger.update(`container "${config.name}" was stopped`);
+    } else {
+      this._logger.info(`container "${config.name}" is not running`);
+    }
+  }
+
+  async waitForContainer(ctxRequ, config) {
+    let cInfo = await this.getInfo(ctxRequ, config);
+
+    if (typeof cInfo == 'undefined') {
+      throw new Error(`container "${config.name}" does not exist`);
+    }
+
+    if (cInfo.State == 'running') {
+      let res = await ctxRequ.request({
+        method: 'post',
+        url: `/containers/${config.name}/wait`
+      });
+      this._logger.update(`container "${config.name}" stopped`);
+
+      if (res.data.Error) {
+        throw new Error(res.data.Error);
+      }
+    } else {
+      this._logger.info(`container "${config.name}" is not running`);
+    }    
+  }
+
+  async removeContainer(ctxRequ, config) {
+    let cInfo = await this.getInfo(ctxRequ, config);
+
+    if (typeof cInfo == 'undefined') {
+      this._logger.info(`container "${config.name}" does not exist`);
+      return;
+    }
+
+    await ctxRequ.request({
+      method: 'delete',
+      url: `/containers/${config.name}`
+    });
+    this._logger.update(`container "${config.name}" was deleted`);
   }
 }
