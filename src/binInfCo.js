@@ -12,6 +12,7 @@ import * as child_process from 'child_process';
 import { default as commander } from 'commander';
 import { default as Mustache } from 'mustache';
 import {default as chalk} from 'chalk';
+import { Docker, Composter } from 'docker-composter';
 import { InfCo } from './infCo';
 import { LoggerConsole } from './loggerConsole';
 import { ValueTransformer } from './valueTransformer';
@@ -27,6 +28,7 @@ import { TaskDockerVolume } from './taskDockerVolume';
 import { TaskLineInFile } from './taskLineInFile';
 import { TaskReviewBackups } from './taskReviewBackups';
 import { TaskFileFromString } from './taskFileFromString';
+import { TaskDockerComposter } from './taskDockerComposter';
 import { TaskWait } from './taskWait';
 
 const logger = new LoggerConsole(chalk);
@@ -60,6 +62,7 @@ async function cmdProcess(cmdObj) {
       transfer: new TaskTransfer(logger),
       couchDb: new TaskCouchDb(logger),
       couchDbDocument: new TaskCouchDbDoc(logger),
+      dockerComposter: new TaskDockerComposter(logger, Composter, Docker),
       dockerContainer: new TaskDockerContainer(logger),
       dockerImage: new TaskDockerImage(logger),
       dockerNetwork: new TaskDockerNetwork(logger),

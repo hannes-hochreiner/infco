@@ -264,6 +264,46 @@ Otherwise, the number of backups can be one less.
 }
 ```
 
+## Docker Composter
+This task can be used to process [Docker Composter](https://github.com/hannes-hochreiner/docker-composter) configurations.
+
+*config*
+  * protocol (string, default: "http")
+  * host (string)
+  * port (number)
+  * socketPath (string, default: "/var/run/docker.sock"): path of a UNIX socket
+  * data (JSON object): Docker Composter configuration to process
+  * actions (array of strings): array of actions to perform
+
+Either "host" and "port", or "socketPath" need to be provided.
+If neither is provided, the default value for "socketPath" is used.
+"data" only needs to be provided for the "create" action.
+Allowed values for actions are:
+  * up (create the containers, networks, and volumes as specified in the Docker Composter configuration)
+  * down (remove the containers, networks, and volumes as specified in the Docker Composter configuration)
+
+```JSON
+{
+  "type": "dockerComposter",
+  "title": "create containers, networks, and volumes",
+  "config": {
+    "data": {
+      "networks": {"test1_net": {}},
+      "volumes": {},
+      "containers": {
+        "test1_cont": {
+          "config": {
+            "Image": "nginx:alpine",
+            "NetworkingConfig": {"EndpointsConfig": {"test1_net": {}}}
+          }
+        }
+      }
+    },
+    "actions": ["up"]
+  }
+}
+```
+
 ## Docker Container
 This task can be used to administrate docker container.
 
