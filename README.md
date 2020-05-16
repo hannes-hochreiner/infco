@@ -1,3 +1,5 @@
+![CI](https://github.com/hannes-hochreiner/infco/workflows/CI/badge.svg)
+![CD](https://github.com/hannes-hochreiner/infco/workflows/CD/badge.svg)
 # InfCo
 
 Another take on infrastructure as code.

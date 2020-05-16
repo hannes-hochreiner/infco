@@ -10,7 +10,7 @@
     "test": "npm run build; npm run build_test; node bld_test/run_jasmine.js",
     "build": "rm -r ./bld; babel src -d bld",
     "build_test": "rm -r ./bld_test; babel src_test -d bld_test",
-    "prepublish": "npm run build"
+    "prepare": "npm run build"
   },
   "author": "Hannes Hochreiner <hannes@hochreiner.net>",
   "license": "MIT",
