@@ -28,12 +28,17 @@ describe('TaskCouchDbDoc', () => {
 
     await tcdd.run({
       createRequest: () => new SequenceSpy([
-        {name: 'open', args: [{protocol: 'http', host: '127.0.0.1', port: 5984, socketPath: undefined}]},
+        {name: 'open', args: [{protocol: 'http', socketPath: '/var/run/docker.sock'}]},
+        {name: 'request', args: [{method: 'get', url: '/containers/testContainer/json'}], return: {data: {NetworkSettings: {Networks: {testNetwork: {IPAddress: 'ipAddress'}}}}}},
+        {name: 'close'},
+        {name: 'open', args: [{protocol: 'http', host: 'ipAddress', port: 5984, socketPath: undefined}]},
         {name: 'request', args: [{method: 'get', url: '/url', auth: {"auth": "auth"}}], return: {data: {_id: 'id', _rev: 'rev', doc: 'newDoc'}}},
         {name: 'close'},
       ])
     }, {
       "url": "/url",
+      "dockerContainer": "testContainer",
+      "dockerNetwork": "testNetwork",
       "content": '{"doc": "newDoc"}',
       "auth": { auth: 'auth' },
     });

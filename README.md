@@ -153,7 +153,7 @@ If the line is not in the file, it is added as the last line.
 
 ## CouchDb
 This task creates a CouchDb on an existing database instance.
-It also adds the security configuration.
+It also adds the security configuration and the "_users" tables.
 
 *config*
   * protocol (string, default: "http")
@@ -161,6 +161,8 @@ It also adds the security configuration.
   * port (number)
   * socketPath (string)
   * urlPrefix (string): prefix to be used, if the database is not at root
+  * dockerContainer (string): name of the Docker container the database runs in
+  * dockerNetwork (string): name of the Docker network the database container is a member of
   * name (string): name of the database
   * auth (object): authentication object
   * auth.username (string)
@@ -173,8 +175,10 @@ It also adds the security configuration.
   * security.members.names (array of string): names of members
   * security.members.roles (array of string): roles of members
 
-Either "host" and "port", or "socketPath" need to be specified.
+Either "host" and "port", "socketPath", or "dockerContainer" and "dockerNetwork" need to be specified.
 If they are not specified, "127.0.0.1" is used as the default host and 5984 as the default port.
+If "dockerContainer" and "dockerNetwork" are specified, the ip address of the container "dockerContainer" in the network "dockerNetwork" is set as the host.
+Docker is contacted using the socket "/var/run/docker.sock".
 
 ```JSON
 {

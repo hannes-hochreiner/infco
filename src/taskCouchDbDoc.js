@@ -12,13 +12,29 @@ export class TaskCouchDbDoc {
       socketPath: config.socketPath
     }
 
-    if (typeof ctxConfig.host === 'undefined' && typeof ctxConfig.port === 'undefined' && typeof ctxConfig.socketPath === 'undefined') {
-      ctxConfig.host = '127.0.0.1';
-      ctxConfig.port = 5984;
-    }
-
     try {
       ctxRequ = context.createRequest();
+
+      if (typeof ctxConfig.socketPath == 'undefined' &&
+        typeof ctxConfig.port == 'undefined' &&
+        typeof ctxConfig.socketPath == 'undefined' &&
+        typeof config.dockerContainer != 'undefined' &&
+        typeof config.dockerNetwork != 'undefined') {
+        await ctxRequ.open({protocol: 'http', socketPath: '/var/run/docker.sock'});
+        ctxConfig.host = (await ctxRequ.request({
+          method: 'get',
+          url: `/containers/${config.dockerContainer}/json`,
+        })).data.NetworkSettings.Networks[config.dockerNetwork].IPAddress;
+        await ctxRequ.close();
+      }
+      
+      if (typeof ctxConfig.socketPath == 'undefined') {
+        ctxConfig.host = ctxConfig.host || '127.0.0.1';
+        ctxConfig.port = ctxConfig.port || 5984;
+      }
+      
+      config.urlPrefix = config.urlPrefix || '';
+
       await ctxRequ.open(ctxConfig);
 
       let reqConfig = {
