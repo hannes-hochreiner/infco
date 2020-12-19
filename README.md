@@ -4,6 +4,10 @@
 
 Another take on infrastructure as code.
 
+## Status
+
+*This project was deprecated in favor of a re-write in Rust: [infco-rs](https://github.com/hannes-hochreiner/infco-rs).
+
 # Transforms
 When the task file is read, transforms get replaced by values depending on their type.
 Transforms are resolved recursively.
